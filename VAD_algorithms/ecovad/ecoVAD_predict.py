@@ -190,6 +190,6 @@ if __name__ == "__main__":
  
         ecoVADpredict(audiofile, 
                     out_path,
-                    cfg["ECOVAD_WEIGHTS_PATH"].model_path,
+                    cfg["ECOVAD_WEIGHTS_PATH"],
                     cfg["THRESHOLD"], 
                     use_gpu=cfg["USE_GPU"]).main()
