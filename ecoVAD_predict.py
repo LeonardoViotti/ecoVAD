@@ -162,6 +162,19 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("data",
+                        help='Path to the data folder.',
+                        default=None,
+                        type=str,
+                        )
+
+    parser.add_argument("--out",
+                        help='Path to where outputs will be saved.',
+                        default=None,
+                        required=True,
+                        type=str,
+                        )
+
     parser.add_argument("--config",
                         help='Path to the config file',
                         default="./config_inference.yaml",
@@ -169,10 +182,16 @@ if __name__ == "__main__":
                         type=str,
                         )
 
-    cli_args = parser.parse_args()
-
+    args = parser.parse_args()
+    
+    if args.out is None:
+        args.out = args.data
+    else:
+        # CREATE DIR IF IT DOESN'T EXIST
+        pass
+    
     # Open the config file
-    with open(cli_args.config) as f:
+    with open(args.config) as f:
         cfg = yaml.load(f, Loader=FullLoader)
 
     # List the folder with files that needs predictions
@@ -180,14 +199,18 @@ if __name__ == "__main__":
     types = ('/**/*.WAV', '/**/*.wav', '/**/*.mp3') # the tuple of file types
     audiofiles= []
     for files in types:
-        audiofiles.extend(glob.glob(cfg["PATH_INPUT_DATA"] + files, recursive=True))
+        audiofiles.extend(glob.glob(args.data + files, recursive=True))
     print("Found {} files to analyze".format(len(audiofiles)))
 
     # Make the prediction
     for audiofile in audiofiles:
         out_name = audiofile.split('/')[-1].split('.')[0]
-        out_path = os.sep.join([cfg["PATH_JSON_DETECTIONS"],  out_name])
- 
+        out_path = os.sep.join([args.out,  out_name])
+        
+        print(audiofile)
+        
+        #  DO SOMETHING ABOUT MP3S HERE
+    
         ecoVADpredict(audiofile, 
                     out_path,
                     cfg["ECOVAD_WEIGHTS_PATH"],
