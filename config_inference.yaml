@@ -7,14 +7,14 @@
 ###################
 
 # Path to the data to be anonymised
-PATH_INPUT_DATA: "./assets/demo_data/data_to_anonymised"
+PATH_INPUT_DATA: "./data"
 
 # Path to the result files, namely json files containing the start and end of detections
 # One json file is created per analysed file
-PATH_JSON_DETECTIONS: "./assets/demo_data/detections/json/ecoVAD"
+PATH_JSON_DETECTIONS: "./data/out"
 
 # Path to store the anonymised data (i.e. audiofiles where human speech has clearly been removed)
-PATH_ANONYMIZED_DATA: "./assets/demo_data/anonymised_data"
+PATH_ANONYMIZED_DATA: "./data/out"
 
 ##############################################
 # Algorithm to use in anonymisation.py script #
@@ -63,10 +63,10 @@ USE_GPU: False
 
 # The created file will be a CSV containing all the information from the detection json files
 # Useful if one wants to visualise the result 
-PATH_PARSED_JSON: "./assets/demo_data/detections/parsed_json/parsed_json.csv"
+PATH_PARSED_JSON: "./data/out/parsed_json.csv"
 
 # Path where the detections should be stored
-PATH_SAMPLE_DETECTIONS: "./assets/demo_data/sample_detections"
+PATH_SAMPLE_DETECTIONS: "./data/out"
 
 # Number of samples that should be taken
 NUMBER_OF_SAMPLES: 5
