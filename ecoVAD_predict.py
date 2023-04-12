@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import pandas as pd
 import argparse
 import librosa
 import torch
@@ -127,9 +128,9 @@ class ecoVADpredict():
                 end_ndx = start_ndx + inputs.size(0)
 
                 metrics_mat[self.METRICS_LABELS_NDX, start_ndx:end_ndx] = outputs.detach()
-
-    def write_json(self, prob_array, threshold):
-
+    
+    
+    def get_pred_array(self, prob_array, threshold):
         detections = []
 
         det_ixs = np.where((prob_array > threshold))[0]
@@ -139,11 +140,21 @@ class ecoVADpredict():
             detections.append(dic)
 
         merged = reduce(self.merge_detected, detections, [])
+        return merged
+    
+    # def write_json(self, merged):
+    #     data = {'ecoVAD': "Timeline", 'content': merged}
 
-        data = {'ecoVAD': "Timeline", 'content': merged}
+    #     with open(self.output + '.json', 'w') as outfile:
+    #         json.dump(data, outfile)
+    #     # return data
+    
+    def create_pd_df(self, pred_array):
+        df = pd.DataFrame(pred_array)
+        df['file'] = audiofile
 
-        with open(self.output + '.json', 'w') as outfile:
-            json.dump(data, outfile)
+        return df
+
 
     def main(self):
 
@@ -153,10 +164,15 @@ class ecoVADpredict():
         self.do_prediction(pred_dl, pred_metrics)
 
         # Write dictionary - keys = seconds, values = probability of speech
-        pred_array = np.array(pred_metrics.cpu()).squeeze(0)
-
+        pred_array_full = np.array(pred_metrics.cpu()).squeeze(0)
+        
+        pred_array = self.get_pred_array(pred_array_full, self.threshold)
+        
+        df = self.create_pd_df(pred_array)
+        
         # Write JSON file
-        self.write_json(pred_array, self.threshold)
+        # self.write_json(pred_array)
+        return df
 
 if __name__ == "__main__":
 
@@ -171,7 +187,6 @@ if __name__ == "__main__":
     parser.add_argument("--out",
                         help='Path to where outputs will be saved.',
                         default=None,
-                        required=True,
                         type=str,
                         )
 
@@ -188,7 +203,8 @@ if __name__ == "__main__":
         args.out = args.data
     else:
         # CREATE DIR IF IT DOESN'T EXIST
-        pass
+        if not os.path.exists(args.out):
+            os.makedirs(args.out)
     
     # Open the config file
     with open(args.config) as f:
@@ -203,16 +219,20 @@ if __name__ == "__main__":
     print("Found {} files to analyze".format(len(audiofiles)))
 
     # Make the prediction
+    df = pd.DataFrame(columns=['start', 'end', 'file'])
     for audiofile in audiofiles:
         out_name = audiofile.split('/')[-1].split('.')[0]
         out_path = os.sep.join([args.out,  out_name])
         
-        print(audiofile)
+        # print(f'Creating detection file for {audiofile}')
+        print(f"Looking for voices in {audiofile.split('/')[-1]}")
         
         #  DO SOMETHING ABOUT MP3S HERE
     
-        ecoVADpredict(audiofile, 
-                    out_path,
-                    cfg["ECOVAD_WEIGHTS_PATH"],
-                    cfg["THRESHOLD"], 
-                    use_gpu=cfg["USE_GPU"]).main()
+        df_i = ecoVADpredict(audiofile, out_path, 
+                             cfg["ECOVAD_WEIGHTS_PATH"],cfg["THRESHOLD"], use_gpu=cfg["USE_GPU"]).main()
+        # print(df_i)
+        df = pd.concat([df, df_i])
+    
+    # Dataframe cosmetics
+    df.to_csv(os.path.join(args.out, '_predictions.csv'), index = False)
