@@ -196,6 +196,13 @@ if __name__ == "__main__":
                         required=False,
                         type=str,
                         )
+    
+    parser.add_argument("--threshold",
+                        help='Detection confidence threshold',
+                        default=0.7,
+                        required=False,
+                        type=float,
+                        )
 
     args = parser.parse_args()
     
@@ -230,9 +237,8 @@ if __name__ == "__main__":
         #  DO SOMETHING ABOUT MP3S HERE
     
         df_i = ecoVADpredict(audiofile, out_path, 
-                             cfg["ECOVAD_WEIGHTS_PATH"],cfg["THRESHOLD"], use_gpu=cfg["USE_GPU"]).main()
+                             cfg["ECOVAD_WEIGHTS_PATH"], args.threshold, use_gpu=cfg["USE_GPU"]).main()
         # print(df_i)
         df = pd.concat([df, df_i])
     
-    # Dataframe cosmetics
     df.to_csv(os.path.join(args.out, '_predictions.csv'), index = False)
