@@ -3,6 +3,7 @@
 
 Requirements:
 
+
 ```
 
 # Dependencies
@@ -19,6 +20,12 @@ pip3 install torch torchvision torchaudio
 pip install opensoundscape==0.8.0
 pip install pydub
 
+
+```
+
+Model weights:
+```
+wget https://osf.io/download/yvdhf/
 
 ```
 
